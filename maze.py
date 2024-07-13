@@ -16,6 +16,11 @@ class Maze:
         self.cell_matrix[maze_cell.y][maze_cell.x] = maze_cell
         print(f'placed cell at {maze_cell.x}, {maze_cell.y}')
 
+    def get_new_start(self):
+        "get a new starting point for a maze path from among occupied, unenclosed cells"
+        candidates = [cell for row in self.cell_matrix for cell in row if (cell != 0 and not cell.enclosed())]
+        return random.choice(candidates)
+
     def make_maze_path(self, start):
         "given a mazeCell, create a random path until it becomes enclosed"
         current_cell = start
