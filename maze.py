@@ -41,6 +41,17 @@ class MazeCell:
         self.q = {(0, -1) : 0, (0, 1) : 0, (1, 0) : 0, (-1, 0) : 0}
         self.goal = False # goal cell
 
+    def dict_for_json(self):
+        """
+        Create a dictionary for conversion to json.
+        Omit the maze object.
+        Convert the RLHyperP to a dictionary.
+        """
+        result = self.__dict__.copy()
+        del(result['maze'])
+        result['hp'] = self.hp.__dict__
+        return result
+
     def loc(self):
         "return a tuple for the location of the cell"
         return (self.x, self.y)
