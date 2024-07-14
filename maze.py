@@ -29,6 +29,7 @@ class MazeCell:
     
     # static moves
     # moves_by_name = { 's' : (0, 1), 'e' : (1, 0), 'n' : (0, -1), 'w' : (-1, 0) }
+    move_names = {(0, 1): 's', (1, 0): 'e', (0, -1): 'n', (-1, 0): 'w'}
     moves = [(0, 1), (1, 0), (0, -1), (-1, 0)] # use the tuples as keys
     reverse_moves = {(0, 1): (0, -1), (0, -1): (0, 1), (1, 0): (-1, 0), (-1, 0): (1, 0)}
 
@@ -46,10 +47,13 @@ class MazeCell:
         Create a dictionary for conversion to json.
         Omit the maze object.
         Convert the RLHyperP to a dictionary.
+        Convert legal and q keys to names (can't use tuples for json)
         """
         result = self.__dict__.copy()
         del(result['maze'])
         result['hp'] = self.hp.__dict__
+        result['legal'] = {MazeCell.move_names[k]: v for k, v in result['legal'].items()}
+        result['q'] = {MazeCell.move_names[k]: v for k, v in result['q'].items()}
         return result
 
     def loc(self):
