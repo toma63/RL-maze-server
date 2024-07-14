@@ -2,34 +2,6 @@ import random
 
 # defines Maze and MazeCell classes
 
-class Maze:
-    "represent and manipulate 2D mazes"
-    def __init__(self, definition):
-        "definition is a diction containing row (rows) and column (cols) count"
-        self.rows = definition['rows']
-        self.cols = definition['cols']
-        "initialize the cell matrix to all zeros.  Each cell can be 0 or a MazeCell."
-        self.cell_matrix = [[0 for _ in range(self.cols)] for _ in range(self.rows)]
-
-    def place_cell(self, maze_cell):
-        "place a MazeCell in the cell_matrix at its x, y coordinates"
-        self.cell_matrix[maze_cell.y][maze_cell.x] = maze_cell
-        print(f'placed cell at {maze_cell.x}, {maze_cell.y}')
-
-    def get_new_start(self):
-        "get a new starting point for a maze path from among occupied, unenclosed cells"
-        candidates = [cell for row in self.cell_matrix for cell in row if (cell != 0 and not cell.enclosed())]
-        return random.choice(candidates)
-
-    def make_maze_path(self, start):
-        "given a mazeCell, create a random path until it becomes enclosed"
-        current_cell = start
-
-        # loop until enclosed
-        while current_cell:
-            self.place_cell(current_cell)
-            current_cell = current_cell.random_step()
-
 class RLHyperP:
     "a set of hyperparameters for reinforcement learning"
 
@@ -51,8 +23,7 @@ class RLHyperP:
         self.rLegal = rLegal
         self.rGoal = rGoal
         self.hiddenSize = hiddenSize
-
-
+        
 class MazeCell:
     "represent the content of a single maze cell"   
     
@@ -69,6 +40,10 @@ class MazeCell:
         self.q = {(0, -1) : 0, (0, 1) : 0, (1, 0) : 0, (-1, 0) : 0}
         self.goal = False # goal cell
 
+    def loc(self):
+        "return a tuple for the location of the cell"
+        return (self.x, self.y)
+    
     def step(self, move):
         "apply a move tuple to the current cell"
         return MazeCell(self.x + move[0], self.y + move[1], self.maze)
@@ -112,6 +87,59 @@ class MazeCell:
     def get_random_legal_move(self):
         "select a random move, but make sure it's legal"
         return random.choice([move for move in MazeCell.moves if self.legal[move]])
+
+class Maze:
+    "represent and manipulate 2D mazes"
+    def __init__(self, definition):
+        "definition is a diction containing row (rows) and column (cols) count"
+        self.rows = definition['rows']
+        self.cols = definition['cols']
+        "initialize the cell matrix to all zeros.  Each cell can be 0 or a MazeCell."
+        self.cell_matrix = [[0 for _ in range(self.cols)] for _ in range(self.rows)]
+        "record the paths (sequences of cell locations) in the maze"
+        self.paths = []
+
+    def place_cell(self, maze_cell):
+        "place a MazeCell in the cell_matrix at its x, y coordinates"
+        self.cell_matrix[maze_cell.y][maze_cell.x] = maze_cell
+        print(f'placed cell at {maze_cell.x}, {maze_cell.y}')
+
+    def get_new_start(self):
+        "get a new starting point for a maze path from among occupied, unenclosed cells"
+        candidates = [cell for row in self.cell_matrix for cell in row if (cell != 0 and not cell.enclosed())]
+        if len(candidates) > 0:
+            return random.choice(candidates)
+        else:
+            return False
+
+    def make_maze_path(self, start):
+        "save the path"
+        path = []
+
+        "given a mazeCell, create a random path until it becomes enclosed"
+        current_cell = start
+
+        # loop until enclosed
+        while current_cell:
+            self.place_cell(current_cell)
+            path.append(current_cell.loc())
+            current_cell = current_cell.random_step()
+
+        self.paths.append(path)
+
+    def make_maze(self, start):
+        "reinitialize the cell_matrix"
+        self.cell_matrix = [[0 for _ in range(self.cols)] for _ in range(self.rows)]
+        "fill the entire maze extending unenclosed points until none remain"
+        self.make_maze_path(start)
+        new_start = self.get_new_start()
+        while new_start:
+            self.make_maze_path(new_start)
+            new_start = self.get_new_start()
+
+
+
+
 
 
     
