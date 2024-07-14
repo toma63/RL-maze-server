@@ -114,6 +114,15 @@ class Maze:
         "record the paths (sequences of cell locations) in the maze"
         self.paths = []
 
+    def dict_for_json(self):
+        """
+        Create a dictionary for use with flask jasonify.
+        Convert MazeCells in cell_matrix to dictionaries.
+        """
+        result = self.__dict__.copy()
+        result['cell_matrix'] = [[cell.dict_for_json() for cell in row] for row in self.cell_matrix]
+        return result
+
     def place_cell(self, maze_cell):
         "place a MazeCell in the cell_matrix at its x, y coordinates"
         self.cell_matrix[maze_cell.y][maze_cell.x] = maze_cell
