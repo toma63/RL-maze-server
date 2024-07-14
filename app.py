@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, abort
-from maze import Maze
+from maze import Maze, MazeCell
 
 app = Flask(__name__)
 
@@ -14,14 +14,15 @@ def create_maze():
     if not data:
         abort(400)
     maze = Maze(data)
-    return jsonify(maze.__dict__), 201
+    maze.make_maze(MazeCell(0, 0, maze))
+    return jsonify(maze.dict_for_json()), 201
 
 # Get Maze
 @app.route('/maze', methods=['GET'])
 def get_maze():
     if not maze:
         abort(400)
-    return jsonify(maze.__dict__)
+    return jsonify(maze.dict_for_json())
 
 
 if __name__ == '__main__':
