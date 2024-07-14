@@ -30,6 +30,7 @@ class MazeCell:
     # static moves
     # moves_by_name = { 's' : (0, 1), 'e' : (1, 0), 'n' : (0, -1), 'w' : (-1, 0) }
     moves = [(0, 1), (1, 0), (0, -1), (-1, 0)] # use the tuples as keys
+    reverse_moves = {(0, 1): (0, -1), (0, -1): (0, 1), (1, 0): (-1, 0), (-1, 0): (1, 0)}
 
     def __init__(self, x, y, maze, hp = RLHyperP()):
         self.x = x
@@ -45,8 +46,11 @@ class MazeCell:
         return (self.x, self.y)
     
     def step(self, move):
-        "apply a move tuple to the current cell"
-        return MazeCell(self.x + move[0], self.y + move[1], self.maze)
+        "apply a legal move tuple to the current cell"
+        self.legal[move] = True # update legality
+        new_cell = MazeCell(self.x + move[0], self.y + move[1], self.maze)
+        new_cell.legal[MazeCell.reverse_moves[move]] = True
+        return new_cell
         
     def random_step(self):
         "move at random to an adjacent cell, return False if no move available"    
@@ -90,7 +94,7 @@ class MazeCell:
 
 class Maze:
     "represent and manipulate 2D mazes"
-    def __init__(self, definition):
+    def __init__(self, definition = {'cols': 10, 'rows': 10}):
         "definition is a diction containing row (rows) and column (cols) count"
         self.rows = definition['rows']
         self.cols = definition['cols']
