@@ -41,6 +41,17 @@ class MazeCell:
         self.q = {(0, -1) : 0, (0, 1) : 0, (1, 0) : 0, (-1, 0) : 0}
         self.goal = False # goal cell
 
+    def dict_for_json(self):
+        """
+        Create a dictionary for conversion to json.
+        Omit the maze object.
+        Convert the RLHyperP to a dictionary.
+        """
+        result = self.__dict__.copy()
+        del(result['maze'])
+        result['hp'] = self.hp.__dict__
+        return result
+
     def loc(self):
         "return a tuple for the location of the cell"
         return (self.x, self.y)
@@ -102,6 +113,15 @@ class Maze:
         self.cell_matrix = [[0 for _ in range(self.cols)] for _ in range(self.rows)]
         "record the paths (sequences of cell locations) in the maze"
         self.paths = []
+
+    def dict_for_json(self):
+        """
+        Create a dictionary for use with flask jasonify.
+        Convert MazeCells in cell_matrix to dictionaries.
+        """
+        result = self.__dict__.copy()
+        result['cell_matrix'] = [[cell.dict_for_json() for cell in row] for row in self.cell_matrix]
+        return result
 
     def place_cell(self, maze_cell):
         "place a MazeCell in the cell_matrix at its x, y coordinates"
