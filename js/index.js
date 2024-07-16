@@ -1,6 +1,6 @@
 
 let canvas = document.getElementById("svg-canvas");
-let maze = {rows: 30, cols: 30}; // placeholder, to be initialized through API
+let maze = {rows: 30, cols: 30, generated: false}; // placeholder, to be initialized through API
 let gridSize = 25;
 
 //colors
@@ -301,22 +301,31 @@ trainForm.addEventListener('submit', (event) => {
     event.preventDefault();
 
     let passes = Number(event.target.passes.value);
-    console.log("passes: ", passes);
+    console.log("passes to run: ", passes);
 
-    if (!maze) {
+    if (!maze.generated) {
         console.error("Error: maze not defined");
     }
     else {
         hideButtons();
-        maze.RLTrain(passes).then(() => {
-            console.log("training complete")
+        trainURL = APIURL + '/train';
+        trainData = {passes: passes};
+        fetch(trainURL, { method: 'POST',
+                           headers: {'Content-Type': 'application/json'},
+                           body: JSON.stringify(trainData)})
+        .then(response => response.json())
+        .then(data => {
+            console.log('Training completed', data);
             showButtons();
-            totalTrainingPasses += passes;
+            totalTrainingPasses = data.total_training_passes;
             trainingPasses.innerText = totalTrainingPasses;
             trainingBanner.hidden = false;
             updateDownloadLink();
+        })
+        .catch(error => {
+            console.error('Error:', error);
         }); // runs async
-        console.log("training started");
+        console.log("Training started");
     }
     trainForm.reset();
     trainFormDefault(passes);
