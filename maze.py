@@ -166,10 +166,6 @@ class MazeCell:
 
         return new_state
 
-
-
-        
-
 class Maze:
     "represent and manipulate 2D mazes"
     def __init__(self, definition = {'cols': 10, 'rows': 10}):
@@ -182,6 +178,7 @@ class Maze:
         self.paths = []
         self.total_training_passes = 0
         self.generated = False
+        self.solve_path = []
 
     def dict_for_json(self):
         """
@@ -190,6 +187,7 @@ class Maze:
         """
         result = self.__dict__.copy()
         result['cell_matrix'] = [[cell.dict_for_json() for cell in row] for row in self.cell_matrix]
+        result['solve_path'] = [cell.dict_for_json() for cell in self.solve_path]
         return result
 
     def place_cell(self, maze_cell):
@@ -257,6 +255,23 @@ class Maze:
 
         # track the total number of passes
         self.total_training_passes += passes
+
+    def solve_from(self, x = 0, y = 0, max_steps = 1000):
+        """
+        Solve the maze using the learned policy by selecting the move with the maximum q value.
+        quit if max_steps is reached.
+        """
+
+        # clear previous solutions
+        self.solve_path = []
+
+        steps = 0
+        cell = self.cell_matrix[y][x]
+        self.solve_path.append(cell)
+        while ((not cell.goal) and (steps < max_steps)):
+            cell = cell.next_state(cell.best_move(True)) # only allows legal moves
+            self.solve_path.append(cell)
+            steps += 1
 
     
 
