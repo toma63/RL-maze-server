@@ -181,6 +181,7 @@ class Maze:
         "record the paths (sequences of cell locations) in the maze"
         self.paths = []
         self.total_training_passes = 0
+        self.generated = False
 
     def dict_for_json(self):
         """
@@ -230,6 +231,7 @@ class Maze:
             new_start = self.get_new_start()
         # mark the goal cell, always lr corner for now
         self.cell_matrix[self.cols - 1][self.rows - 1].goal = True
+        self.generated = True
 
     # methods for Q learning follow
     ###############################
