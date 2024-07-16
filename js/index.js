@@ -1,6 +1,7 @@
 
 let canvas = document.getElementById("svg-canvas");
 let maze = {rows: 30, cols: 30}; // placeholder, to be initialized through API
+let gridSize = 25;
 
 //colors
 const gridColor = "#000";
@@ -11,11 +12,11 @@ const bgColor = "#fff";
 
 const APIURL = 'http://127.0.0.1:5000';
 
-function initDisplay(gridSize = 30, maze) {
+function initDisplay(gridSize, maze) {
     // clear the previous display
-    allElements = document.querySelector('.maze-elt');
+    allElements = Array.from(document.getElementsByClassName('maze-elt'));
     if (allElements) {
-        allElements.foreach(elt => elt.remove());
+        allElements.forEach(elt => elt.remove());
     }
 
     // size the canvas
@@ -28,11 +29,26 @@ function addLine(x1, y1, x2, y2, width, color, cssClass) {
     line.setAttribute('x1', x1);
     line.setAttribute('y1', y1);
     line.setAttribute('x2', x2);
+
     line.setAttribute('y2', y2);
     line.setAttribute('stroke-width', width);
     line.setAttribute('stroke', color);
     line.setAttribute('class', cssClass);
     canvas.appendChild(line);
+}
+
+function addRect(x, y, width, height, strokeWidth, strokeColor, fillColor, cssClass) {
+    let rect = document.createElementNS('http://www.w3.org/2000/svg', 'rect');
+    rect.setAttribute('x', x);
+    rect.setAttribute('y', y);
+    rect.setAttribute('width', width);
+
+    rect.setAttribute('height', height);
+    rect.setAttribute('stroke-width', strokeWidth);
+    rect.setAttribute('stroke', strokeColor);
+    rect.setAttribute('fill', fillColor);
+    rect.setAttribute('class', cssClass);
+    canvas.appendChild(rect);
 }
 
 function makeDisplayGrid(gridSize = 100) {
@@ -45,76 +61,55 @@ function makeDisplayGrid(gridSize = 100) {
     }
 }
 
+// display the generated maze after it is created
 function makeMazeDisplay() {
-
+    for (let path of maze.paths) {
+        for (let i = 0 ; i < path.length - 1 ; i++) {
+            markCrossing(path[i], path[i + 1]);
+        }
+    }
+    markGoal(maze.cols - 1, maze.rows - 1);
 }
 
 // display coordinates for the center of a cell
-function displayCenterLoc() {
-    let centerDelta = this.maze.gridSize / 2;
-    let result = [this.x * this.maze.gridSize + centerDelta, this.y * this.maze.gridSize + centerDelta];
+function displayCenterLoc(cellX, cellY) {
+    let centerDelta = gridSize / 2;
+    let result = [cellX * gridSize + centerDelta, cellY * gridSize + centerDelta];
     return result;
 }
 
 // mark the goal cell in green
-function markGoal(goalColor = this.maze.goalColor) {
-    this.goal = true;
-    this.maze.ctx.fillStyle = goalColor;
-    this.maze.ctx.fillRect(this.x * this.maze.gridSize + 5,
-        this.y * this.maze.gridSize + 5,
-        this.maze.gridSize - 10,
-        this.maze.gridSize - 10);
+function markGoal(cellX, cellY) {
+    maze.cell_matrix[cellY][cellX].goal = true;
+    addRect(cellX * gridSize + 5, cellY * gridSize + 5, gridSize - 10, gridSize - 10, 10, goalColor, goalColor, 'maze-elt');
 }
 
 // change the color of grid segments crossed
-// update legal moves
-function markCrossing(fromCell, bgColor = this.maze.bgColor, pathColor = this.maze.Pathcolor) {
+// fromCell and toCell are [x, y] cell pairs
+function markCrossing(fromCell, toCell) {
 
     // mark the grid crossing
-    this.maze.ctx.beginPath();
-    this.maze.ctx.strokeStyle = bgColor;
-    this.maze.ctx.lineWidth = 10;
-
-    if (this.x < fromCell.x) {
-        this.maze.ctx.moveTo(fromCell.x * this.maze.gridSize, fromCell.y * this.maze.gridSize + 5);
-        this.maze.ctx.lineTo(fromCell.x * this.maze.gridSize, (fromCell.y + 1) * this.maze.gridSize - 5);
-        fromCell.legal.w = true;
-        this.legal.e = true;
+    lineWidth = 10;
+    if (toCell[0] < fromCell[0]) {
+        addLine(fromCell[0] * gridSize, fromCell[1] * gridSize + 5, fromCell[0] * gridSize, (fromCell[1] + 1) * gridSize - 5, lineWidth, bgColor, 'maze-elt');
     }
-    else if (this.x > fromCell.x) {
-        this.maze.ctx.moveTo(this.x * this.maze.gridSize, this.y * this.maze.gridSize + 5);
-        this.maze.ctx.lineTo(this.x * this.maze.gridSize, (this.y + 1) * this.maze.gridSize - 5);
-        fromCell.legal.e = true;
-        this.legal.w = true;
+    else if (toCell[0] > fromCell[0]) {
+        addLine(toCell[0] * gridSize, toCell[1] * gridSize + 5, toCell[0] * gridSize, (toCell[1] + 1) * gridSize - 5, lineWidth, bgColor, 'maze-elt');
     }
-    else if (this.y < fromCell.y) {
-        this.maze.ctx.moveTo(fromCell.x * this.maze.gridSize + 5, fromCell.y * this.maze.gridSize);
-        this.maze.ctx.lineTo((fromCell.x + 1) * this.maze.gridSize - 5, fromCell.y * this.maze.gridSize);
-        fromCell.legal.n = true;
-        this.legal.s = true;
+    else if (toCell[1] < fromCell[1]) {
+        addLine(fromCell[0] * gridSize + 5, fromCell[1] * gridSize, (fromCell[0] + 1) * gridSize - 5, fromCell[1] * gridSize, lineWidth, bgColor, 'maze-elt');
     }
-    else if (this.y > fromCell.y) {
-        this.maze.ctx.moveTo(this.x * this.maze.gridSize + 5, this.y * this.maze.gridSize);
-        this.maze.ctx.lineTo((this.x + 1) * this.maze.gridSize - 5, this.y * this.maze.gridSize);
-        fromCell.legal.s = true;
-        this.legal.n = true;
+    else if (toCell[1] > fromCell[1]) {
+        addLine(toCell[0] * gridSize + 5, toCell[1] * gridSize, (toCell[0] + 1) * gridSize - 5, toCell[1] * gridSize, lineWidth, bgColor, 'maze-elt');
     }
-    this.maze.ctx.stroke();
-    this.maze.ctx.closePath();
 
     // mark the path
-    this.markPath(fromCell, pathColor);
-
+    this.markPath(fromCell, toCell);
 }
 
-function markPath(fromCell, pathColor = this.maze.pathColor) {
-    this.maze.ctx.beginPath();
-    this.maze.ctx.strokeStyle = pathColor;
-    this.maze.ctx.lineWidth = 5;
-    this.maze.ctx.moveTo(...fromCell.displayCenterLoc());
-    this.maze.ctx.lineTo(...this.displayCenterLoc());
-    this.maze.ctx.stroke();
-    this.maze.ctx.closePath();
+// fromCell and toCell are [x, y] cell pairs
+function markPath(fromCell, toCell) {
+    addLine(...displayCenterLoc(...fromCell), ...displayCenterLoc(...toCell), 5, pathColor, 'maze-elt');
 }
 
 class RLHyperP {
@@ -217,7 +212,7 @@ function updateDownloadLink() {
 function makeDownloadMazeLink() {
     // get relevant maze data for download
     // legal moves, x, y, q, goal
-    const cellInfo = maze.cellMatrix.flat().map((cell) =>
+    const cellInfo = maze.cell_matrix.flat().map((cell) =>
         { return {x: cell.x, y: cell.y, q: cell.q, legal: cell.legal, goal: cell.goal}; });
     const config = { cell_info: cellInfo, rlhp: rlHP};
     let blob = new Blob([JSON.stringify(config)], { type: 'application/json' });
@@ -252,7 +247,7 @@ settingsForm.addEventListener('submit', (event) => {
 
     let rows = Number(event.target.rows.value);
     let columns = Number(event.target.columns.value);
-    let gridSize = Number(event.target.gridSize.value);
+    gridSize = Number(event.target.gridSize.value); // it's global
 
     //console.log('Rows:', rows);
     //console.log('Columns:', columns);
@@ -267,9 +262,12 @@ settingsForm.addEventListener('submit', (event) => {
                        body: JSON.stringify(initData)})
     .then(response => response.json())
     .then(data => {
-        console.log('Successfull created.', data);
+        console.log('Successfully created.', data);
         maze = data;
+        initDisplay(gridSize, maze);
+        makeDisplayGrid(gridSize);
         makeMazeDisplay();
+        updateDownloadLink();
     })
     .catch(error => {
         console.error('Error:', error);
@@ -277,7 +275,6 @@ settingsForm.addEventListener('submit', (event) => {
 
     settingsForm.reset();
     settingsFormDefaults(columns, rows, gridSize);
-    updateDownloadLink();
 });
 
 hpForm.addEventListener('submit', (event) => {
@@ -357,5 +354,4 @@ solveForm.addEventListener('submit', (event) => {
     solveFormDefaults(startx, starty, limit);
 });
 
-initDisplay(30, maze);
-makeDisplayGrid(30);
+
