@@ -1,7 +1,10 @@
 from flask import Flask, request, jsonify, abort
+from flask_cors import CORS
 from maze import Maze, MazeCell
 
 app = Flask(__name__)
+
+CORS(app, resources={r"/*": {"origins": "*", "allow_headers": "Content-Type"}})
 
 # persistent data
 maze = None # maze object when created

@@ -9,6 +9,8 @@ const solveColor = "#f00";
 const goalColor = "#0f0";
 const bgColor = "#fff";
 
+const APIURL = 'http://127.0.0.1:5000';
+
 function initDisplay(gridSize = 30, maze) {
     // clear the previous display
     allElements = document.querySelector('.maze-elt');
@@ -256,8 +258,22 @@ settingsForm.addEventListener('submit', (event) => {
     //console.log('Columns:', columns);
     //console.log('Grid Size:', gridSize);
 
-    maze = new Maze(rows, columns);
-    maze.makeMaze(gridSize);
+    // send a POST to generate the maze in the server
+    // update the display with the returned data
+    createURL = APIURL + '/create';
+    initData = {rows: rows, cols: columns};
+    fetch(createURL, { method: 'POST',
+                       headers: {'Content-Type': 'application/json'},
+                       body: JSON.stringify(initData)})
+    .then(response => response.json())
+    .then(data => {
+        console.log('Successfull created.', data);
+        maze = data;
+        makeMazeDisplay();
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
 
     settingsForm.reset();
     settingsFormDefaults(columns, rows, gridSize);
