@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Maze</title>
+    <link rel="stylesheet" href="css/index.css" />
+</head>
+<body>
+    <h1 id="main-heading">Maze</h1>
+    <section id="form-section">
+        <h2>Settings</h2>
+        <form name="settings" class="form">
+            <div class="form-item">
+                <label for="rows">Rows:</label>
+                <input type="number" id="rows" name="rows" required="true" />
+            </div>
+            <div class="form-item">
+                <label for="columns">Columns:</label>
+                <input type="number" id="columns" name="columns" required="true" />
+            </div>
+            <div class="form-item">
+                <label for="gridSize">Grid Size:</label>
+                <input type="number" id="gridSize" name="gridSize" required="true" />
+            </div>
+            <button type="submit" value="submit" name="submit" class="submit-button">Make Maze</button>
+        </form><br>
+        <div id="download-container"></div><br>
+        <h2>Hyperparameters</h2>
+        <form name="hyperparameters" class="vert-form">
+            <div class="form-item">
+                <label class="v-label" for="epsilon">epsilon:</label>
+                <input type="number" step="any" id="epsilon" name="epsilon" required="true" />
+            </div>
+            <div class="form-item">
+                <label class="v-label" for="epsilon_decay">epsilon_decay:</label>
+                <input type="number" step="any" id="epsilon_decay" name="epsilon_decay" required="true" />
+            </div>
+            <div class="form-item">
+            <div class="form-item">
+                <label class="v-label" for="min_epsilon">min_epsilon:</label>
+                <input type="number" step="any" id="min_epsilon" name="min_epsilon" required="true" />
+            </div>
+            <div class="form-item">
+                <label class="v-label" for="alpha">alpha:</label>
+                <input type="number" step="any" id="alpha" name="alpha" required="true" />
+            </div>
+            <div class="form-item">
+                <label class="v-label" for="gamma">gamma:</label>
+                <input type="number" step="any" id="gamma" name="gamma" required="true" />
+            </div>
+            <div class="form-item">
+                <label class="v-label" for="rIllegal">Illegal move reward:</label>
+                <input type="number" step="any" id="rIllegal" name="rIllegal" required="true" />
+            </div>
+            <div class="form-item">
+                <label class="v-label" for="rLegal">Legal move reward:</label>
+                <input type="number" step="any" id="rLegal" name="rLegal" required="true" />
+            </div>
+            <div class="form-item">
+                <label class="v-label" for="rGoal">Goal move reward:</label>
+                <input type="number" step="any" id="rGoal" name="rGoal" required="true" />
+            </div>
+            <div class="form-item">
+                <label class="v-label" for="hiddenSize">Hidden layer size:</label>
+                <input type="number" step="any" id="hiddenSize" name="hiddenSize" required="true" />
+            </div>
+            <button type="submit" value="submit" name="submit" class="hp-button">Update Values</button>
+        </form><br>
+        <h2>Training</h2>
+        <form name="train" class="form">
+            <div class="form-item">
+                <label for="passes">Passes:</label>
+                <input type="number" id="passes" name="passes" required="true" />
+            </div>
+            <button type="submit" value="train" name="train" class="submit-button">Run Training</button>
+        </form><br>
+        <span id="training-banner">
+            Total training passes: 
+            <span id="training-passes"></span>
+        </span>
+         <h2>Solve</h2>
+        <form name="solve" class="form">
+            <div class="form-item">
+                <label for="startx">Starting x:</label>
+                <input type="number" id="startx" name="startx" required="true" />
+            </div>
+            <div class="form-item">
+                <label for="starty">Starting y:</label>
+                <input type="number" id="starty" name="starty" required="true" />
+            </div>
+            <div class="form-item">
+                <label for="limit">Move limit:</label>
+                <input type="number" id="limit" name="limit" required="true" />
+            </div>
+            <button type="submit" value="solve" name="solve" class="submit-button">Solve</button>
+        </form><br>
+        <div id="solution-complete">
+            Solution complete, total steps: 
+            <span id="solution-steps"></span><br>
+        </div>
+        <span id="solution-timeout">Solution stopped after reaching the limit, more training recommended</span>
+        </section>
+        <div id="svg-container">
+            <svg id="svg-canvas" width="1000" height="1000"></svg>
+        </div>
+        <script src="./js/index.js"></script>
+        </body>
+        
+        </html>

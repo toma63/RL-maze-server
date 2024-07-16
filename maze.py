@@ -130,7 +130,7 @@ class Maze:
     def place_cell(self, maze_cell):
         "place a MazeCell in the cell_matrix at its x, y coordinates"
         self.cell_matrix[maze_cell.y][maze_cell.x] = maze_cell
-        print(f'placed cell at {maze_cell.x}, {maze_cell.y}')
+        #print(f'placed cell at {maze_cell.x}, {maze_cell.y}')
 
     def get_new_start(self):
         "get a new starting point for a maze path from among occupied, unenclosed cells"
