@@ -99,6 +99,10 @@ class MazeCell:
                 (self.y == 0 or self.maze.cell_matrix[self.y - 1][self.x]) and
                 (self.y == self.maze.rows - 1 or self.maze.cell_matrix[self.y + 1][self.x]))
 
+    
+    # methods for Q learning follow
+    ###############################
+
     def get_random_move(self):
         "select a random move"
         return random.choice(MazeCell.moves)
@@ -106,6 +110,65 @@ class MazeCell:
     def get_random_legal_move(self):
         "select a random move, but make sure it's legal"
         return random.choice([move for move in MazeCell.moves if self.legal[move]])
+    
+    def best_move(self, force_legal = False):
+        """
+        Select the best move based on q values.
+        If all q values are 0, select at random.
+        If force_legal is true, only legal values are selected when selecting randomly.
+        """
+                # return a random selection of all q's are zero
+        if all(val == 0 for val in self.q.values()):
+            if force_legal:
+                return self.get_random_legal_move()
+            else:
+                return self.get_random_move()
+        else:
+            return max(self.q, key=self.q.get)
+        
+    def next_state(self, move):
+        "apply a move to get the next state (cell).  Moves are tuples (x, y)"
+        return self.maze.cell_matrix[self.y + move[1]][self.x + move[0]]
+    
+    def update_state(self):
+        """
+        Update the state based on the Bellman equation and epsilon greedy.
+        Return the new cell.
+        """
+
+        # select a move based on epsilon greedy
+        if random.random() < self.hp.epsilon:
+            # explore
+            move = self.get_random_move()
+        else:
+            # exploit
+            move = self.best_move()
+
+        # update epsilon
+        self.hp.epsilon *= self.hp.epsilon_decay
+
+        # compute reward
+        if self.legal[move]:
+            new_state = self.next_state(move)
+            if new_state.goal:
+                reward = self.hp.rGoal
+            else:
+                reward = self.hp.rLegal
+        else:
+            new_state = self # don't apply an illegal move
+            reward = self.hp.rIllegal
+
+        # update q
+        current_q = self.q[move]
+        new_state_q = new_state.q[new_state.best_move()]
+        new_q = current_q + self.hp.alpha * (reward + (self.hp.gamma * new_state_q) - current_q)
+        self.q[move] = new_q
+
+        return new_state
+
+
+
+        
 
 class Maze:
     "represent and manipulate 2D mazes"
@@ -117,6 +180,7 @@ class Maze:
         self.cell_matrix = [[0 for _ in range(self.cols)] for _ in range(self.rows)]
         "record the paths (sequences of cell locations) in the maze"
         self.paths = []
+        self.total_training_passes = 0
 
     def dict_for_json(self):
         """
@@ -164,6 +228,37 @@ class Maze:
         while new_start:
             self.make_maze_path(new_start)
             new_start = self.get_new_start()
+        # mark the goal cell, always lr corner for now
+        self.cell_matrix[self.cols - 1][self.rows - 1].goal = True
+
+    # methods for Q learning follow
+    ###############################
+
+    def get_random_cell(self):
+        "return a random cell from the cell_matrix"
+        return random.choice(random.choice(self.cell_matrix))
+    
+    
+    # run training by starting multiple passes at random places
+    # for each pass:
+    #   update q values until the goal is reached
+    def rl_train(self, passes = 10):
+        "run training for the specified number of passes"
+        for _ in range(passes):
+        
+            cell = self.get_random_cell()
+            steps = 0
+
+            while (not cell.goal):
+                cell = cell.update_state()
+                steps += 1
+
+        # track the total number of passes
+        self.total_training_passes += passes
+
+    
+
+
 
 
 
