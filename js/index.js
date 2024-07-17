@@ -1,5 +1,6 @@
 
 let canvas = document.getElementById("svg-canvas");
+canvas.style.visibility = 'hidden'; // unhide in initDisplay() when maze created
 let maze = {rows: 30, cols: 30, generated: false}; // placeholder, to be initialized through API
 let gridSize = 25;
 
@@ -13,6 +14,8 @@ const bgColor = "#fff";
 const APIURL = 'http://127.0.0.1:5000';
 
 function initDisplay(gridSize, maze) {
+    // canvas is initially hidden
+    canvas.style.visibility = 'visible';
     // clear the previous display
     allElements = Array.from(document.getElementsByClassName('maze-elt'));
     if (allElements) {
