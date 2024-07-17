@@ -37,5 +37,17 @@ def run_q_learning():
     maze.rl_train(data['passes']) # number of passes to run
     return jsonify({'total_training_passes': maze.total_training_passes}), 200 # returns total training passes
 
+# Solve based on learned policy, max q
+# receives starting x, y, and maximum steps
+# returns the solution path as a list  of x, y pairs
+@app.route('/solve', methods=['POST'])
+def solve():
+    global maze
+    data = request.get_json()
+    if not data:
+        abort(400)
+    maze.solve_from(data['x'], data['y'], data['max_steps']) # 
+    return jsonify({'solve_path': maze.solve_path}), 200 # returns solution path
+
 if __name__ == '__main__':
     app.run(debug=True)
