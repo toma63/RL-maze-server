@@ -71,6 +71,13 @@ function makeMazeDisplay() {
     markGoal(maze.cols - 1, maze.rows - 1);
 }
 
+// display the solution path
+function showSolutionPath(solutionPath) {
+    for (let i = 0; i < solutionPath.length - 1; i++) {
+        markPath(solutionPath[i], solutionPath[i + 1], solveColor);
+    }
+}
+
 // display coordinates for the center of a cell
 function displayCenterLoc(cellX, cellY) {
     let centerDelta = gridSize / 2;
@@ -108,8 +115,8 @@ function markCrossing(fromCell, toCell) {
 }
 
 // fromCell and toCell are [x, y] cell pairs
-function markPath(fromCell, toCell) {
-    addLine(...displayCenterLoc(...fromCell), ...displayCenterLoc(...toCell), 5, pathColor, 'maze-elt');
+function markPath(fromCell, toCell, color = pathColor) {
+    addLine(...displayCenterLoc(...fromCell), ...displayCenterLoc(...toCell), 5, color, 'maze-elt');
 }
 
 class RLHyperP {
@@ -342,22 +349,40 @@ solveForm.addEventListener('submit', (event) => {
     console.log('starty:', starty);
     console.log('limit:', limit);
 
-    if (!maze) {
+    if (!maze.generated) {
         console.error("Error: maze not defined");
     }
     else {
+        solveURL = APIURL + '/solve';
+        solveData = {x: startx, y:starty, max_steps: limit};
         solutionCompleteBanner.hidden = true;
         solutionTimeoutBanner.hidden = true;
 
-        let steps = maze.solveFrom(startx, starty, limit);
-        console.log("Done solving!");
-        if (steps === limit) {
-            solutionTimeoutBanner.hidden = false;
-        }
-        else {
-            solutionCompleteSteps.innerText = steps;
-            solutionCompleteBanner.hidden = false;
-        }
+        fetch(solveURL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(solveData)
+        })
+        .then(response => response.json())
+        .then(data => {
+            console.log('Solution completed', data);
+            showSolutionPath(data.solve_path);
+            let steps = data.solve_path.length;
+            let pathEnd = data.solve_path[steps -1]
+            if (!maze.cell_matrix[pathEnd[1]][pathEnd[0]].goal) { //check if goal reached
+                solutionTimeoutBanner.hidden = false;
+            }
+            else {
+                solutionCompleteBanner.hidden = false;
+                solutionCompleteSteps.innerText = steps;                
+            }
+        })
+        .catch(error => {
+                console.error('Error:', error);
+        }); // runs async
+
+        console.log("Solution requested.");
+
     }
     solveForm.reset();
     solveFormDefaults(startx, starty, limit);
