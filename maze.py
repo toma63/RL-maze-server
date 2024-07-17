@@ -178,7 +178,7 @@ class Maze:
         self.paths = []
         self.total_training_passes = 0
         self.generated = False
-        self.solve_path = []
+        self.solve_path = [] # list of (x, y) tuples
 
     def dict_for_json(self):
         """
@@ -187,7 +187,6 @@ class Maze:
         """
         result = self.__dict__.copy()
         result['cell_matrix'] = [[cell.dict_for_json() for cell in row] for row in self.cell_matrix]
-        result['solve_path'] = [cell.dict_for_json() for cell in self.solve_path]
         return result
 
     def place_cell(self, maze_cell):
@@ -267,10 +266,10 @@ class Maze:
 
         steps = 0
         cell = self.cell_matrix[y][x]
-        self.solve_path.append(cell)
+        self.solve_path.append((cell.x, cell.y))
         while ((not cell.goal) and (steps < max_steps)):
             cell = cell.next_state(cell.best_move(True)) # only allows legal moves
-            self.solve_path.append(cell)
+            self.solve_path.append((cell.x, cell.y))
             steps += 1
 
     
