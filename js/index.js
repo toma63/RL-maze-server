@@ -99,7 +99,7 @@ function markGoal(cellX, cellY) {
 function markCrossing(fromCell, toCell) {
 
     // mark the grid crossing
-    lineWidth = 10;
+    lineWidth = 11;
     if (toCell[0] < fromCell[0]) {
         addLine(fromCell[0] * gridSize, fromCell[1] * gridSize + 5, fromCell[0] * gridSize, (fromCell[1] + 1) * gridSize - 5, lineWidth, bgColor, 'maze-elt');
     }
