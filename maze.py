@@ -169,12 +169,12 @@ class MazeCell:
 class Maze:
     "represent and manipulate 2D mazes"
     def __init__(self, definition = {'cols': 10, 'rows': 10}):
-        "definition is a diction containing row (rows) and column (cols) count"
+        "definition is a dictionary containing row (rows) and column (cols) count"
         self.rows = definition['rows']
         self.cols = definition['cols']
-        "initialize the cell matrix to all zeros.  Each cell can be 0 or a MazeCell."
+        # initialize the cell matrix to all zeros.  Each cell can be 0 or a MazeCell.
         self.cell_matrix = [[0 for _ in range(self.cols)] for _ in range(self.rows)]
-        "record the paths (sequences of cell locations) in the maze"
+        # record the paths (sequences of cell locations) in the maze
         self.paths = []
         self.total_training_passes = 0
         self.generated = False
